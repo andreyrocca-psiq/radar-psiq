@@ -1,5 +1,5 @@
 /* Radar Psiquiatria — service worker */
-const CACHE = "radar-psiq-v3";
+const CACHE = "radar-psiq-v4";
 const SHELL = [
   "./",
   "./index.html",

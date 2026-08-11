@@ -32,7 +32,7 @@
   --danger:#B23A2E;
   --radius:10px;
   --maxw:1240px;
-  --c-HUM:#2E6DB4; --c-ANS:#C2871C; --c-PSI:#6A4C9C; --c-ADD:#B23A4E;
+  --c-DEP:#2E6DB4; --c-BIP:#1CA3B8; --c-ANS:#C2871C; --c-PSI:#6A4C9C; --c-ADD:#B23A4E;
   --c-TRA:#A85632; --c-TOC:#7A4E97; --c-INF:#2E9E8F; --c-NPI:#7A6A55;
   --c-ALI:#C7568C; --c-PER:#4E5DAE; --c-SUI:#BC4530; --c-SON:#2F8585;
   --c-SOM:#8A6D3B; --c-NEU:#0E8F8C; --c-SEX:#B5559E; --c-FOR:#5F6B2A;
@@ -171,6 +171,9 @@ button{font-family:inherit;cursor:pointer}
 .schip.active{background:var(--chan,var(--signal));color:#fff;border-color:transparent}
 .schip.active:hover{filter:brightness(1.06)}
 .schip .n{font-family:"IBM Plex Mono",monospace;font-size:11px;opacity:.7}
+#jsubnav{margin-top:-8px}
+.subnav__lbl{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-faint);align-self:center;margin-right:2px}
 
 .subsec{margin:0 0 26px}
 .subsec__head{display:flex;align-items:baseline;gap:10px;margin:0 0 11px;
@@ -303,6 +306,7 @@ footer code{font-family:"IBM Plex Mono",monospace;background:#EEEEF4;padding:1px
     <div class="chips" id="chips"></div>
     <div class="banner" id="banner"><span id="bannerText"></span></div>
     <div class="subnav" id="subnav"></div>
+    <div class="subnav" id="jsubnav"></div>
     <div id="feed"></div>
   </section>
 </div>
@@ -351,8 +355,8 @@ const JOURNALS = [
   {ta:"Transl Psychiatry", name:"Translational Psychiatry", hint:null},
   {ta:"Neuropsychopharmacology", name:"Neuropsychopharmacology", hint:"NEU"},
   {ta:"J Clin Psychiatry", name:"The Journal of Clinical Psychiatry", hint:null},
-  {ta:"J Affect Disord", name:"Journal of Affective Disorders", hint:"HUM"},
-  {ta:"Bipolar Disord", name:"Bipolar Disorders", hint:"HUM"},
+  {ta:"J Affect Disord", name:"Journal of Affective Disorders", hint:null},
+  {ta:"Bipolar Disord", name:"Bipolar Disorders", hint:"BIP"},
   {ta:"Depress Anxiety", name:"Depression and Anxiety", hint:"ANS"},
   {ta:"Acta Psychiatr Scand", name:"Acta Psychiatrica Scandinavica", hint:null},
   {ta:"Eur Psychiatry", name:"European Psychiatry", hint:null},
@@ -397,7 +401,7 @@ const JOURNALS = [
   {ta:"World J Biol Psychiatry", name:"The World Journal of Biological Psychiatry", hint:null},
   {ta:"CNS Spectr", name:"CNS Spectrums", hint:null},
   {ta:"Brain Behav Immun", name:"Brain, Behavior, and Immunity", hint:null},
-  {ta:"Int J Bipolar Disord", name:"International Journal of Bipolar Disorders", hint:"HUM"},
+  {ta:"Int J Bipolar Disord", name:"International Journal of Bipolar Disorders", hint:"BIP"},
   {ta:"Borderline Personal Disord Emot Dysregul", name:"Borderline Personality Disorder & Emotion Dysregulation", hint:"PER"},
   {ta:"Autism Res", name:"Autism Research", hint:"INF"},
   {ta:"J Sleep Res", name:"Journal of Sleep Research", hint:"SON"},
@@ -410,15 +414,22 @@ const JOURNALS = [
    Classification is heuristic (title-only) and multi-rótulo: um artigo pode
    pertencer a 2–3 subespecialidades e carregar vários grupos de transtornos. */
 const CHANNELS = [
-  {code:"HUM", name:"Transtornos do Humor",
-   kw:["depression","depressive","bipolar","mania","manic","hypomania","mood disorder","affective disorder","dysthymia","melancholia","melancholic","unipolar","MDD","mood stabilizer","mood stabiliser","antidepressant","lithium"],
+  {code:"DEP", name:"Depressão",
+   kw:["depression","depressive","unipolar","dysthymia","melancholia","melancholic","MDD","major depressive","antidepressant","mood disorder","mood disorders","affective disorder","affective disorders"],
    g:[
-    {code:"depmaior", name:"Depressão maior", kw:["major depression","major depressive","MDD","unipolar depression","melancholia","melancholic"]},
-    {code:"bipolar", name:"Transtorno bipolar", kw:["bipolar","mania","manic","hypomania","mood stabilizer","mood stabiliser","lithium","valproate"]},
+    {code:"maior", name:"Depressão maior", kw:["major depression","major depressive","MDD","unipolar depression","melancholia","melancholic"]},
     {code:"resistente", name:"Depressão resistente", kw:["treatment-resistant depression","treatment resistant depression","refractory depression"]},
     {code:"perinatal", name:"Depressão perinatal", kw:["postpartum depression","perinatal depression","peripartum","postnatal depression"]},
     {code:"persistente", name:"Distimia / persistente", kw:["dysthymia","persistent depressive"]},
+    {code:"sazonal", name:"Depressão sazonal", kw:["seasonal affective","seasonal depression"]},
+   ]},
+  {code:"BIP", name:"Transtorno Bipolar",
+   kw:["bipolar","mania","manic","hypomania","manic-depressive","cyclothymia","mood stabilizer","mood stabiliser","lithium","mood disorder","mood disorders","affective disorder","affective disorders"],
+   g:[
+    {code:"mania", name:"Mania e hipomania", kw:["mania","manic","hypomania"]},
     {code:"misto", name:"Estados mistos", kw:["mixed features","mixed episode","mixed state"]},
+    {code:"estabilizador", name:"Estabilizadores do humor", kw:["mood stabilizer","mood stabiliser","lithium","valproate","lamotrigine"]},
+    {code:"ciclagem", name:"Ciclagem rápida", kw:["rapid cycling","rapid-cycling"]},
    ]},
   {code:"ANS", name:"Transtornos de Ansiedade",
    kw:["anxiety","anxious","panic","phobia","phobic","agoraphobia","generalized anxiety","generalised anxiety","GAD"],
@@ -606,6 +617,7 @@ const state = {
   days: 90,
   channel: "ALL",
   group: null,          // grupo de transtornos selecionado (2º nível), dentro de um canal
+  jfilter: null,        // periódico [ta] para filtrar dentro da subespecialidade (null = todos)
   query: "",
   active: new Set(JOURNALS.map(j=>j.ta)),
   articles: [],
@@ -905,7 +917,7 @@ function renderChannels(){
     const color = code==="ALL" ? "var(--signal)" : "var(--c-"+code+")";
     const li = h("button",{class:"chan"+(active?" active":""), style:"--chan:"+color,
         "data-empty": (code!=="ALL"&&!n)?"1":null,
-        onclick:()=>{ state.channel=activeCode; state.group=null; renderChannels(); renderFeed(); }},
+        onclick:()=>{ state.channel=activeCode; state.group=null; state.jfilter=null; renderChannels(); renderFeed(); }},
       h("span",{class:"chan__code",style:code==="ALL"?"background:var(--ink)":""}, code==="ALL"?"ALL":code),
       h("span",{class:"chan__name"}, label),
       h("span",{class:"chan__n"}, code==="ALL"? String(visibleBase().length): String(n))
@@ -913,7 +925,7 @@ function renderChannels(){
     ul.append(li);
 
     const chip = h("button",{class:"chip"+(active?" active":""), style:"--chan:"+color,
-        onclick:()=>{ state.channel=activeCode; state.group=null; renderChannels(); renderFeed(); }},
+        onclick:()=>{ state.channel=activeCode; state.group=null; state.jfilter=null; renderChannels(); renderFeed(); }},
       h("span",{}, code==="ALL"?"Todas":code),
       h("span",{class:"n"}, code==="ALL"? String(visibleBase().length): String(n))
     );
@@ -994,17 +1006,41 @@ function renderSubnav(chan, taggedList){
       onclick:()=>{ state.group = (state.group===code? null : code); renderFeed(); }},
       label, h("span",{class:"n"}, String(n)));
   };
+  nav.append(h("span",{class:"subnav__lbl"},"grupo"));
   nav.append(mk(null,"Todos",taggedList.length));
   for(const g of ch.g){ const n=gcount[g.code]||0; if(n) nav.append(mk(g.code,g.name,n)); }
+}
+
+// Barra de filtro por periódico, dentro do canal selecionado. `list` já reflete
+// o grupo de transtornos ativo (2º nível), para que as contagens batam.
+function renderJSubnav(chan, list){
+  const nav=$("#jsubnav"); nav.innerHTML="";
+  if(chan==="ALL") return;
+  const color="var(--c-"+chan+")";
+  const jc={};
+  for(const a of list) jc[a.jta]=(jc[a.jta]||0)+1;
+  const tas=Object.keys(jc).sort((a,b)=> (jc[b]-jc[a]) || a.localeCompare(b));
+  // nada a filtrar se só há um periódico (a menos que já haja um filtro ativo, para poder limpar)
+  if(tas.length<=1 && !state.jfilter) return;
+
+  const mk=(ta,label,n)=>{
+    const active = state.jfilter===ta;
+    return h("button",{class:"schip"+(active?" active":""), style:"--chan:"+color,
+      onclick:()=>{ state.jfilter = (state.jfilter===ta? null : ta); renderFeed(); }},
+      label, h("span",{class:"n"}, String(n)));
+  };
+  nav.append(h("span",{class:"subnav__lbl"},"periódico"));
+  nav.append(mk(null,"Todos", list.length));
+  for(const ta of tas) nav.append(mk(ta, ta, jc[ta]));
 }
 
 function renderFeed(){
   const feed=$("#feed"); feed.innerHTML="";
 
-  if(!state.articles.length){ $("#subnav").innerHTML=""; return; } // skeleton/error/initial
+  if(!state.articles.length){ $("#subnav").innerHTML=""; $("#jsubnav").innerHTML=""; return; } // skeleton/error/initial
   const base = visibleBase();
   if(!base.length){
-    $("#subnav").innerHTML="";
+    $("#subnav").innerHTML=""; $("#jsubnav").innerHTML="";
     feed.append(h("div",{class:"state"},
       h("h2",{},"Nada nesta seleção"),
       h("p",{},"Ajuste a busca ou reative periódicos no filtro à esquerda.")));
@@ -1016,23 +1052,39 @@ function renderFeed(){
     const ch = CHAN_BY_CODE[chan];
     // multi-tag: artigos rotulados com este canal (não só os de primário)
     const tagged = base.filter(a=>a.tags.includes(chan));
-    renderSubnav(chan, tagged);
 
     if(!tagged.length){
+      $("#subnav").innerHTML=""; $("#jsubnav").innerHTML="";
       feed.append(h("div",{class:"state"},
         h("h2",{},"Sem novidades em " + ch.name),
         h("p",{},"Nenhum artigo desta subespecialidade na janela atual. Tente ampliar para 180 dias.")));
       return;
     }
 
+    // Dois filtros independentes dentro do canal: por grupo de transtornos e por
+    // periódico. As contagens de cada barra refletem a seleção da outra.
+    const inGroup = a => !state.group || (a.topics||[]).some(tp=>tp.chan===chan && tp.code===state.group);
+    const inJournal = a => !state.jfilter || a.jta===state.jfilter;
+    renderSubnav(chan, tagged.filter(inJournal));   // grupos: contam dentro do periódico escolhido
+    renderJSubnav(chan, tagged.filter(inGroup));    // periódicos: contam dentro do grupo escolhido
+
+    // conjunto exibido = canal ∩ periódico (o grupo é aplicado abaixo)
+    const view = tagged.filter(inJournal);
+    if(!view.length){
+      feed.append(h("div",{class:"state"},
+        h("h2",{},"Sem artigos de " + state.jfilter),
+        h("p",{},"Nenhum artigo deste periódico nesta subespecialidade. Escolha “Todos” ou outro periódico.")));
+      return;
+    }
+
     // grupo de transtornos selecionado -> lista plana
     if(state.group){
       const gname = GROUP_NAME[chan+":"+state.group] || state.group;
-      const list = tagged.filter(a=>(a.topics||[]).some(tp=>tp.chan===chan && tp.code===state.group));
+      const list = view.filter(a=>(a.topics||[]).some(tp=>tp.chan===chan && tp.code===state.group));
       if(!list.length){
         feed.append(h("div",{class:"state"},
           h("h2",{},"Sem artigos em " + gname),
-          h("p",{},"Tente outro grupo de transtornos ou amplie a janela.")));
+          h("p",{},"Tente outro grupo de transtornos, outro periódico ou amplie a janela.")));
         return;
       }
       const wrap=h("div",{class:"cards"}); list.forEach(a=>wrap.append(articleCard(a)));
@@ -1044,7 +1096,7 @@ function renderFeed(){
     const color="var(--c-"+chan+")";
     const seen = new Set();
     for(const g of ch.g){
-      const list = tagged.filter(a=>(a.topics||[]).some(tp=>tp.chan===chan && tp.code===g.code));
+      const list = view.filter(a=>(a.topics||[]).some(tp=>tp.chan===chan && tp.code===g.code));
       if(!list.length) continue;
       list.forEach(a=>seen.add(a.pmid));
       const sub=h("section",{class:"subsec", style:"--chan:"+color},
@@ -1056,7 +1108,7 @@ function renderFeed(){
       const wrap=h("div",{class:"cards"}); list.forEach(a=>wrap.append(articleCard(a)));
       sub.append(wrap); feed.append(sub);
     }
-    const outros = tagged.filter(a=>!seen.has(a.pmid));
+    const outros = view.filter(a=>!seen.has(a.pmid));
     if(outros.length){
       const sub=h("section",{class:"subsec", style:"--chan:"+color},
         h("div",{class:"subsec__head"},
@@ -1071,7 +1123,7 @@ function renderFeed(){
   }
 
   // ALL: agrupado por subespecialidade (primário), em ordem de canal
-  $("#subnav").innerHTML="";
+  $("#subnav").innerHTML=""; $("#jsubnav").innerHTML="";
   const groups = {};
   for(const a of base){ (groups[a.primary]||(groups[a.primary]=[])).push(a); }
   for(const ch of CHANNELS){
@@ -1118,7 +1170,7 @@ function init(){
 
   $("#window").addEventListener("change", e=>{
     state.days=+e.target.value; store.set(STORE+":days", e.target.value);
-    state.channel="ALL"; state.group=null; loadAll(false);
+    state.channel="ALL"; state.group=null; state.jfilter=null; loadAll(false);
   });
   $("#q").addEventListener("input", e=>{ state.query=e.target.value.trim(); renderChannels(); renderFeed(); });
   $("#refresh").addEventListener("click", ()=>loadAll(true));
