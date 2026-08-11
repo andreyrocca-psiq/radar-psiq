@@ -325,11 +325,10 @@ const NCBI_ID = "&tool=radar-psiquiatria&email=radar-psiquiatria%40users.noreply
 // Access-Control-Allow-Origin:*), os demais são proxies CORS de reserva para
 // quando o NCBI bloqueia o IP ou a rede corporativa barra o domínio.
 const PROXIES = [
-  u => u,
-  u => "https://corsproxy.io/?url=" + encodeURIComponent(u),
-  u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u),
+  u => u,                                                              // direto: ideal, sobretudo com API key do NCBI
+  u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u), // fallback CORS mais estável
   u => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u),
-  u => "https://thingproxy.freeboard.io/fetch/" + u,
+  u => "https://corsproxy.io/?url=" + encodeURIComponent(u),
 ];
 let proxyPref = 0;                 // índice do último proxy que respondeu; tentado primeiro
 const FETCH_TIMEOUT = 15000;       // aborta uma via lenta para liberar a próxima
@@ -762,8 +761,11 @@ async function loadAll(force){
   showSkeletons();
 
   const k = apiKey();
-  const chunk = k ? 8 : 3;
-  const gap = k ? 220 : 1100;
+  // Sem API key o NCBI limita a ~3 req/s e devolve páginas de erro SEM cabeçalho
+  // CORS quando é excedido (o que o navegador reporta como "No Access-Control-Allow-Origin").
+  // Por isso, sem chave, reduzimos a concorrência para 2 e damos folga entre as rodadas.
+  const chunk = k ? 8 : 2;
+  const gap = k ? 220 : 1200;
   const idToJ = {}; const idSet = [];
   let ok=0, fail=0, done=0;
 
